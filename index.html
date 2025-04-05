@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Data Entry Form</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h2>Smart Sheet Form</h2>
+    <form id="dataEntryForm">
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+
+        <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" required>
+
+        <label for="notes">Notes:</label>
+        <textarea id="notes"></textarea>
+
+        <button type="submit">Save Entry</button>
+    </form>
+
+    <h2>Saved Entries</h2>
+    <button id="showEntriesBtn">Show Saved Entries</button>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
