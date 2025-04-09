@@ -9,25 +9,23 @@
 </head>
 
 <body>
-    <h2>Smart Sheet Form</h2>
-    <form id="dataEntryForm">
-        <label for="name">Full Name:</label>
-        <input type="text" id="name" required>
+    <h2 class="project-title">✨ Smart Table Creator ✨</h2>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" required>
+    <div class="column-builder">
+        <h3>Create Your Table Columns</h3>
+        <div id="columnList"></div>
+        <input type="text" id="newColumnInput" placeholder="Enter column name (e.g. Department)">
+        <button type="button" id="addColumnBtn">Add Column</button>
+        <button type="button" id="startFormBtn">Start Data Entry</button>
+    </div>
 
-        <label for="phone">Phone Number:</label>
-        <input type="tel" id="phone" required>
-
-        <label for="notes">Notes:</label>
-        <textarea id="notes"></textarea>
-
-        <button type="submit">Save Entry</button>
-    </form>
+    <!-- This will hold the dynamic form -->
+    <form id="dataEntryForm" style="display: none;"></form>
 
     <h2>Saved Entries</h2>
     <button id="showEntriesBtn">Show Saved Entries</button>
+
+
 
     <script src="script.js"></script>
 </body>

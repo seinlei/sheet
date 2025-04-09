@@ -1,62 +1,126 @@
-if (document.getElementById("dataEntryForm")) {
-    document.getElementById("dataEntryForm").addEventListener("submit", function (event) {
-        event.preventDefault();
+let customColumns = [];
 
-        let name = document.getElementById("name").value.trim();
-        let email = document.getElementById("email").value.trim();
-        let phone = document.getElementById("phone").value.trim();
-        let notes = document.getElementById("notes").value.trim();
+// Add column button
+document.getElementById("addColumnBtn").addEventListener("click", () => {
+    const newColumn = document.getElementById("newColumnInput").value.trim();
+    if (newColumn && !customColumns.includes(newColumn)) {
+        customColumns.push(newColumn);
+        updateColumnList();
+        document.getElementById("newColumnInput").value = "";
+    }
+});
 
-        // Regular expression for validation
-        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        const phonePattern = /^\d{7,15}$/;
+function updateColumnList() {
+    const list = document.getElementById("columnList");
+    list.innerHTML = "";
+    customColumns.forEach((col, index) => {
+        const item = document.createElement("div");
+        item.textContent = `${index + 1}. ${col}`;
+        list.appendChild(item);
+    });
+}
 
-        if (!name) {
-            alert("Name is required");
-            return;
-        }
-        if (!emailPattern.test(email)) {
-            alert("Invalid email address");
-            return;
-        }
-        if (!phonePattern.test(phone)) {
-            alert("Invalid phone number");
-            return;
-        }
+// Start data entry
+document.getElementById("startFormBtn").addEventListener("click", () => {
+    if (customColumns.length === 0) {
+        alert("Please add at least one column first.");
+        return;
+    }
 
-        let entries = JSON.parse(localStorage.getItem("formEntries")) || [];
+    localStorage.setItem("customColumns", JSON.stringify(customColumns));
+    buildForm(customColumns);
+    document.querySelector(".column-builder").style.display = "none";
+    document.getElementById("dataEntryForm").style.display = "block";
+});
 
-        let editIndex = parseInt(localStorage.getItem("editIndex"));
-        if (!isNaN(editIndex)) {
-            // Editing an existing entry
-            entries[editIndex] = { name, email, phone, notes };
+// Build the data entry form dynamically
+function buildForm(columns) {
+    const form = document.getElementById("dataEntryForm");
+    form.innerHTML = "";
 
-            // Clear edit data
-            localStorage.removeItem("editIndex");
-            localStorage.removeItem("editEntry");
-        } else {
-            // Adding a new entry
-            entries.push({ name, email, phone, notes });
-        }
+    columns.forEach(col => {
+        const label = document.createElement("label");
+        label.textContent = col;
+        label.setAttribute("for", col);
 
-        localStorage.setItem("formEntries", JSON.stringify(entries));
-        this.reset();
-        alert("Data saved successfully");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = col;
+        input.required = true;
 
-        window.location.href = "entries.html"; // Redirect to saved entries
+        form.appendChild(label);
+        form.appendChild(input);
     });
 
-    // If editing, load the existing data into the form
-    let editEntry = localStorage.getItem("editEntry");
-    if (editEntry) {
-        let entry = JSON.parse(editEntry);
+    const submitBtn = document.createElement("button");
+    submitBtn.type = "submit";
+    submitBtn.textContent = "Save Entry";
+    form.appendChild(submitBtn);
 
-        document.getElementById("name").value = entry.name;
-        document.getElementById("email").value = entry.email;
-        document.getElementById("phone").value = entry.phone;
-        document.getElementById("notes").value = entry.notes;
-    }
+    form.addEventListener("submit", handleFormSubmit);
 }
-document.getElementById("showEntriesBtn").addEventListener("click", function () {
-    window.location.href = "entries.html"; // Redirect to the saved entries page
+
+function handleFormSubmit(event) {
+    event.preventDefault();
+
+    const formData = {};
+    customColumns.forEach(col => {
+        formData[col] = document.getElementById(col).value.trim();
+    });
+
+    let entries = JSON.parse(localStorage.getItem("formEntries")) || [];
+    entries.push(formData);
+    localStorage.setItem("formEntries", JSON.stringify(entries));
+
+    alert("Entry saved!");
+    event.target.reset();
+}
+
+
+// Show saved entries page
+document.getElementById("showEntriesBtn").addEventListener("click", () => {
+    window.location.href = "entries.html";
 });
+
+window.addEventListener("DOMContentLoaded", () => {
+    const editData = JSON.parse(localStorage.getItem("editEntry"));
+    const editIndex = localStorage.getItem("editIndex");
+    const savedColumns = JSON.parse(localStorage.getItem("customColumns")) || [];
+
+    if (editData && editIndex !== null && savedColumns.length > 0) {
+        customColumns = savedColumns;
+        buildForm(customColumns);
+
+        // Show the form and hide the column builder
+        document.querySelector(".column-builder").style.display = "none";
+        document.getElementById("dataEntryForm").style.display = "block";
+
+        // Pre-fill inputs
+        customColumns.forEach(col => {
+            const input = document.getElementById(col);
+            if (input) input.value = editData[col] || "";
+        });
+
+        // When the form is submitted, update the existing entry
+        document.getElementById("dataEntryForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = {};
+            customColumns.forEach(col => {
+                formData[col] = document.getElementById(col).value.trim();
+            });
+
+            let entries = JSON.parse(localStorage.getItem("formEntries")) || [];
+            entries[editIndex] = formData;
+            localStorage.setItem("formEntries", JSON.stringify(entries));
+
+            // Clear editing state
+            localStorage.removeItem("editEntry");
+            localStorage.removeItem("editIndex");
+
+            alert("Entry updated!");
+            window.location.href = "entries.html";
+        }, { once: true }); // prevent duplicate submits
+    }
+});
+
